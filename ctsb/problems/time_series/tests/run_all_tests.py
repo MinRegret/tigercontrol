@@ -11,6 +11,7 @@ def run_all_tests(steps=1000, show=False):
     test_sp500(steps=steps, show_plot=show)
     test_uci_indoor(steps=steps, show_plot=show)
     test_crypto(steps=steps, show_plot=show)
+    test_ctrl_indices(steps=steps, show_plot=show)
     print("\nall time-series problems tests passed\n")
   
 if __name__ == "__main__":

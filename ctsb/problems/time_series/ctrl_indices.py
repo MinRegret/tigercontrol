@@ -18,7 +18,7 @@ class CtrlIndices(TimeSeriesProblem):
     def __init__(self):
         self.initialized = False
 
-    def initialize(self, input_signals = ['pna', 'ea', 'wa', 'wp', 'eu', 'soi', 'esoi', 'nino12', 'nino34', 'nino4'], output_signals = ['oni'], history = 1, timeline = 1):
+    def initialize(self, input_signals = ['pna', 'ea', 'wa', 'wp', 'eu', 'soi', 'esoi', 'nino12', 'nino34', 'nino4'], include_month = False, output_signals = ['oni'], history = 1, timeline = 1):
         """
         Description:
             Check if data exists, else download, clean, and setup.
@@ -29,7 +29,7 @@ class CtrlIndices(TimeSeriesProblem):
         """
         self.initialized = True
         self.T = 0
-        self.X, self.y = ctrl_indices(input_signals, output_signals, history, timeline) # get data
+        self.X, self.y = ctrl_indices(input_signals, include_month, output_signals, history, timeline) # get data
         self.max_T = self.y.shape[0]
 
         return (self.X[0], self.y[0])
@@ -62,7 +62,7 @@ class CtrlIndices(TimeSeriesProblem):
         """
         assert self.initialized
 
-        return "Timestep: {} out of {}, date: ".format(self.T+1, self.max_T) + self.df.iloc[self.T, 0]
+        return "Timestep: {} out of {}".format(self.T+1, self.max_T)
 
     def close(self):
         """

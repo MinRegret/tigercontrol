@@ -23,7 +23,7 @@ def test_ctrl_indices(steps=1000, show_plot=False, verbose=False):
         print(info)
     if show_plot:
         plt.plot(test_output)
-        plt.title("Control Indices")
+        plt.title("ONI")
         plt.show(block=False)
         plt.pause(1)
         plt.close()

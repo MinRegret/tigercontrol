@@ -6,7 +6,7 @@ import ctsb
 import os
 import jax.numpy as np
 import pandas as pd
-from ctsb.utils import ctrl_indices, get_ctsb_dir
+from ctsb.utils.dataset_registry import ctrl_indices, get_ctsb_dir
 from ctsb.error import StepOutOfBounds
 from ctsb.problems.time_series import TimeSeriesProblem
 
@@ -17,9 +17,8 @@ class CtrlIndices(TimeSeriesProblem):
 
     def __init__(self):
         self.initialized = False
-        self.data_path = os.path.join(get_ctsb_dir(), "data/CM4_ctrl_indices.nc")
 
-    def initialize(self, X = ['pna', 'ea', 'wa', 'wp', 'eu', 'soi', 'esoi', 'nino12', 'nino34', 'nino4'], y = ['oni'], history = 1, timeline = 1):
+    def initialize(self, input_signals = ['pna', 'ea', 'wa', 'wp', 'eu', 'soi', 'esoi', 'nino12', 'nino34', 'nino4'], output_signals = ['oni'], history = 1, timeline = 1):
         """
         Description:
             Check if data exists, else download, clean, and setup.
@@ -30,7 +29,7 @@ class CtrlIndices(TimeSeriesProblem):
         """
         self.initialized = True
         self.T = 0
-        self.X, self.y = ctrl_indices(X, y, history, timeline) # get data
+        self.X, self.y = ctrl_indices(input_signals, output_signals, history, timeline) # get data
         self.max_T = self.y.shape[0]
 
         return (self.X[0], self.y[0])

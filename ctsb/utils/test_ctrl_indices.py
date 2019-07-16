@@ -6,15 +6,16 @@ import jax.numpy as np
 import matplotlib.pyplot as plt
 
 
-def test_crypto(steps=1000, show_plot=False, verbose=False):
+def test_ctrl_indices(steps=1000, show_plot=False, verbose=False):
     T = steps
-    problem = ctsb.problem("Crypto-v0")
+    problem = CtrlIndices()
     problem.initialize()
     assert problem.T == 0
 
     test_output = []
     for t in range(T):
-        test_output.append(problem.step())
+        x_t, y_t = problem.step()
+        test_output.append(y_t)
 
     assert problem.T == T
     
@@ -23,13 +24,13 @@ def test_crypto(steps=1000, show_plot=False, verbose=False):
         print(info)
     if show_plot:
         plt.plot(test_output)
-        plt.title("Crypto")
+        plt.title("Control CtrlIndices")
         plt.show(block=False)
         plt.pause(1)
         plt.close()
-    print("test_crypto passed")
+    print("test_ctrl_indices passed")
     return
 
 
 if __name__=="__main__":
-    test_crypto(show_plot=True)
+    test_ctrl_indices(show_plot=True)

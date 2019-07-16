@@ -157,7 +157,7 @@ def crypto():
     return pd.read_csv(path_crypto_csv)
 
 
-def ctrl_indices(X, y, history, timeline):
+def ctrl_indices(input_signals, output_signals, history, timeline):
     """
     Description:
         ...
@@ -167,5 +167,81 @@ def ctrl_indices(X, y, history, timeline):
         ...
     """
 
-    datapath = 'ctsb/ctsb/data/CM4_ctrl_indices.nc'
+    ############################## GET DATA ###################################
+
+    datapath = 'ctsb/ctsb/data/CM4_ctrl_indices.csv'
+    signals_pd = pd.read_csv(datapath)
+
+    signal_length = signals_pd['nino34'].values.shape[0]
+
+    # make timeline into np.array
+    if(type(timeline) is int):
+        timeline = [timeline]
+
+    timeline = np.array(timeline)
+
+    ################################ GET ONI ###################################
+
+    ''' 0. Get nino34 signal for ONI'''
+    nino34 = signals_pd['nino34'].values
+
+    ''' 1. Get climatology '''
+    clm = np.zeros(12)
+    for month in range(12):
+        section = [12 * i + month for i in range(signal_length // 12)]
+        clm[month] = np.mean(nino34[section])
+
+    ''' 2. Compute anomaly '''
+    anm = np.array(nino34)
+    for i in range(signal_length):
+        anm[i] = nino34[i] - clm[i % 12]
+
+    ''' 3. Get ONI '''
+    oni = np.array(nino34)
+    for i in range(signal_length):
+        oni[i] = np.mean(nino34[max(0, (i - m + 1)) : min((i + 1), signal_length)])
+
+    ########################## PREPARE INPUT/ OUTPUT SIGNALS ############################
+
+    # input signals
+    X_signals = np.zeros((signal_length, 0))
+
+    for signal in input_signals:
+        if(signal == 'oni'):
+            new_signal = oni.reshape((signal_length, 1))
+        else:
+            new_signal = (signals_pd[signal].values).reshape((signal_length, 1))
+        X_signals = np.append(X_signals, new_signal, axis = 1)
+
+    # output signals
+    y_signals = np.zeros((signal_length, 0))
+
+    for signal in output_signals:
+        if(signal == 'oni'):
+            new_signal = oni.reshape((signal_length, 1))
+        else:
+            new_signal = (signals_pd[signal].values).reshape((signal_length, 1))
+        y_signals = np.append(y_signals, new_signal, axis = 1)
+
+    ########################## CONVERT SIGNALS TO (X, y) #############################
+
+    effective_length = signal_length - history - timeline
+
+    # Observations
+    X = np.ndarray((effective_length, history, np.array(input_signals).shape[0]))
+
+    for i in range(effective_length):
+        X[i, 0:history, :] = X_signals[i:(i + history), :]
+
+    # Labels
+    y = np.ndarray((effective_length, timeline.shape[0], np.array(output_signals).shape[0]))
+
+    for t in timeline:
+        for i in range(effective_length):
+            y[i, t, :] = y_signals[i + history + t - 1, :]
+
+    if(timeline.shape[0] == 1):
+        y = y.reshape((effective_length, np.array(output_signals).shape[0]))
+
+    return (X, y)
     
